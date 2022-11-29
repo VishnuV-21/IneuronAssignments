@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class JdbcUtil1 {
 
@@ -21,7 +22,19 @@ public class JdbcUtil1 {
 
 	}
 
-	public void closeConnections(ResultSet resultSet, Statement statement, Connection connection) {
+	public static int getUserInputForSelectQuery () {
+		System.out.println("\t\t\tChoose the operation listed below on student table\r\n"
+				+ "\t1. Create \t\t2. Read \t\t3. Update \t\t4. Delete");
+		Scanner sc=new Scanner(System.in);
+		System.out.println();
+		int userChoice=sc.nextInt();
+		return userChoice;
+	}
+	
+	public static void getUserInputForInsertQuery() {
+		int sid=3;
+	}
+	public static void closeConnections(ResultSet resultSet, Statement statement,Connection connection) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
