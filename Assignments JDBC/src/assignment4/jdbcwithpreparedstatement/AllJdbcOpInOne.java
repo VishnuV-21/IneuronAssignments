@@ -1,11 +1,11 @@
-package assignment4.jdbc;
+package assignment4.jdbcwithpreparedstatement;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
-								//This is Question no 1 in the assignment.
+
 public class AllJdbcOpInOne {
 
 	public static void main(String[] args) {
