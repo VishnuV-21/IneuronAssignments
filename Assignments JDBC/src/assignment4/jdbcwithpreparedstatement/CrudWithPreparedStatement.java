@@ -1,18 +1,18 @@
 package assignment4.jdbcwithpreparedstatement;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Scanner;
 
-public class AllJdbcOpInOne {
+public class CrudWithPreparedStatement {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Connection connection = null;
 		ResultSet resultSet = null;
-		Statement statement = null;
+	PreparedStatement ps=null;
 		Scanner sc = null;
 		int s_id = 0;
 		String Name = null;
@@ -22,38 +22,42 @@ public class AllJdbcOpInOne {
 		String insertQuery = null;
 		String updateQuery = null;
 //get the input from the user ,Which choice user wants
-		userChoiceMain = JdbcUtil1.getUserInputForSelectQuery();
+		userChoiceMain = JdbcUtilps.getUserInputForSelectQuery();
 //gets the connection here and assigning the connection to local variable connection
 		try {
-			connection = JdbcUtil1.getConnection();
+			connection = JdbcUtilps.getConnection();
 			if (connection != null) {
-				statement = connection.createStatement();
 				// here i used switch statement to perform the operation based on user's choice
 				switch (userChoiceMain) {
 				// 1 is for Create/Insert Operation
 				case 1: {
-					if (statement != null) {
+					insertQuery = "Insert into student values(?,?,?,?);";
+					ps = connection.prepareStatement(insertQuery);
+					if (ps != null) {
 						sc = new Scanner(System.in);
 						System.out.println("Please provide the required details to create the query");
 						System.out.println("Enter the Stud_Id :");
 						s_id = sc.nextInt();
+						ps.setInt(1, s_id);
 						System.out.println("Enter the Stud_Name :");
 						Name = sc.next();
+						ps.setString(2, Name);
 						System.out.println("Enter the Course_Id :");
 						c_id = sc.nextInt();
+						ps.setInt(3, c_id);
 						System.out.println("Enter the Stud_Age :");
 						Age = sc.nextInt();
+						ps.setInt(4, Age);
 
-						insertQuery = String.format("Insert into student values('%d','%s','%d','%d')", s_id, Name, c_id,
-								Age);
+						
 //the below code is not working because of ` symbol i think!!
 						// String.format("Insert into student values
 						// (`%d`,`%s`,`%d`,`%d`)",s_id,Name,c_id,Age);
-						int rowCount = statement.executeUpdate(insertQuery);
+						int rowCount = ps.executeUpdate();
 						if (rowCount != 0) {
 							// Getting the output for insert operation
 							System.out.println("No of rows affected :: " + rowCount);
-							JdbcUtil1.closeConnections(resultSet, statement, connection);
+							JdbcUtilps.closeConnections(resultSet, ps, connection);
 						} else
 							System.out.println("No rows affected");
 
@@ -62,21 +66,25 @@ public class AllJdbcOpInOne {
 				}
 				// 2 is for Select/Read Operation
 				case 2: {
-
-					if (statement != null) {
-						String selectQuery = "Select s_id,Name,c_id,Age from student;";
-						resultSet = statement.executeQuery(selectQuery);
+					Scanner sc1=new Scanner(System.in);
+					String selectQuery = "Select s_id,Name,Age from student where c_id=?;";
+					ps = connection.prepareStatement(selectQuery);
+					if (ps != null) {
+						System.out.println("Enter the course id whose details you want to view: ");
+						c_id=sc1.nextInt();
+						ps.setInt(1, c_id);
+						
+						resultSet = ps.executeQuery();
 						if (resultSet != null) {
 							// processing result set
-							System.out.println("S_Id\t\tName\t\tC_Id\t\tAge");
+							System.out.println("S_Id\t\tName\t\tAge");
 							System.out.println("-----------------------------------------------------");
 							while (resultSet.next()) {
 								Integer stud_id = resultSet.getInt(1);
 								String stud_Name = resultSet.getString(2);
-								Integer course_id = resultSet.getInt(3);
-								Integer stud_Age = resultSet.getInt(4);
+								Integer stud_Age = resultSet.getInt(3); //this(n) should be natural order irrespective of the table order
 								System.out
-										.println(stud_id + "\t\t" + stud_Name + "\t\t" + course_id + "\t\t" + stud_Age);
+										.println(stud_id + "\t\t" + stud_Name + "\t\t" + stud_Age);
 							}
 						}
 					}
@@ -84,55 +92,73 @@ public class AllJdbcOpInOne {
 				}
 				// 3 is for Update operations
 				case 3: {
-					if (statement != null) {
-						sc = new Scanner(System.in);
+					
+					if (ps == null) {
+						Scanner sc2 = new Scanner(System.in);
 						System.out.println("Please provide the required details to create the query");
 						System.out.println(
 								"Which field do you want to update?\r\n 1.Name\t2.c_id\t3.Age\t4.All the 3 fileds");
-						int updateOption = sc.nextInt();
+						int updateOption = sc2.nextInt();
 						if (updateOption == 1) {
-							System.out.println("Enter the Stud_id whose name you want to  change : ");
-							s_id = sc.nextInt();
+							updateQuery = "Update student set Name =? where s_id=?;";
+							ps = connection.prepareStatement(updateQuery);
 							System.out.println("Enter the new Stud_Name :");
-							Name = sc.next();
-							Name = "'" + Name + "'";
-							updateQuery = "Update student set Name =" + Name + " where s_Id=" + s_id + ";";
+							Name = sc2.next();
+							ps.setString(1,Name);
+							System.out.println("Enter the Stud_id whose name you want to  change : ");
+							s_id = sc2.nextInt();
+							ps.setInt(2,s_id);
+								
 						}
 						if (updateOption == 2) {
-							System.out.println("Enter the Stud_id whose CourseId you want to  change : ");
-							s_id = sc.nextInt();
+							Scanner sc3 = new Scanner(System.in);
+							updateQuery = "Update student set c_id=? where s_id=?";
+							ps = connection.prepareStatement(updateQuery);
 							System.out.println("Enter the new Course_Id :");
-							c_id = sc.nextInt();
-							insertQuery = String.format("Update student set c_id='%d' where s_id='%d'", c_id, s_id);
+							c_id = sc3.nextInt();
+							ps.setInt(1, c_id);
+							System.out.println("Enter the Stud_id whose CourseId you want to  change : ");
+							s_id = sc3.nextInt();
+							ps.setInt(2, s_id);
 						}
 						if (updateOption == 3) {
-							System.out.println("Enter the Stud_id whose age you want to  change : ");
-							s_id = sc.nextInt();
+							Scanner sc4 = new Scanner(System.in);
+							updateQuery = "Update student set Age=? where s_id=?";
+							ps = connection.prepareStatement(updateQuery);
 							System.out.println("Enter the new Stud_Age :");
-							Age = sc.nextInt();
-							updateQuery = String.format("Update student set Age='%d' where s_id='%d'", Age, s_id);
+							Age = sc4.nextInt();
+							ps.setInt(1, Age);
+							System.out.println("Enter the Stud_id whose age you want to  change : ");
+							s_id = sc4.nextInt();
+							ps.setInt(2, s_id);
+							
 						}
 						if (updateOption == 4) {
-							System.out.println("Enter the Stud_id whose details you want to  change : ");
-							s_id = sc.nextInt();
+							Scanner sc5 = new Scanner(System.in);
+							updateQuery ="Update student set Name=?, c_id=? ,Age=? where s_id=?";
+							ps = connection.prepareStatement(updateQuery);
 							System.out.println("Enter the new Stud_Name :");
-							Name = sc.next();
+							Name = sc5.next();
+							ps.setString(1, Name);
 							System.out.println("Enter the new Course_Id :");
-							c_id = sc.nextInt();
+							c_id = sc5.nextInt();
+							ps.setInt(2, c_id);
 							System.out.println("Enter the new Stud_Age :");
-							Age = sc.nextInt();
-							updateQuery = String.format(
-									"Update student set Name='%s', c_id='%d' ,Age='%d' where s_id='%d'", Name, c_id,
-									Age, s_id);
+							Age = sc5.nextInt();
+							ps.setInt(3, Age);
+							System.out.println("Enter the Stud_id whose details you want to  change : ");
+							s_id = sc5.nextInt();
+							ps.setInt(4, s_id);
+							
 						}
 //the below code is not working because of ` symbol i think!!
 						// String.format("Insert into student values
 						// (`%d`,`%s`,`%d`,`%d`)",s_id,Name,c_id,Age);
-						int rowCount = statement.executeUpdate(updateQuery);
+						int rowCount = ps.executeUpdate();
 						if (rowCount != 0) {
 							// Getting the output for insert operation
 							System.out.println("No of rows affected :: " + rowCount);
-							JdbcUtil1.closeConnections(resultSet, statement, connection);
+							JdbcUtilps.closeConnections(resultSet, ps, connection);
 						} else
 							System.out.println("No recrods affected ");
 
@@ -141,21 +167,24 @@ public class AllJdbcOpInOne {
 				}
 				// 4 is for delete operations
 				case 4: {
-					if (statement != null) {
-						sc = new Scanner(System.in);
+					String deleteQuery = "Delete from student where s_id=?";
+					ps = connection.prepareStatement(deleteQuery);
+					if (ps != null) {
+						Scanner sc6 = new Scanner(System.in);
 						System.out.println("Please provide the required details to create the query");
 						System.out.println("Enter the Stud_Id whose fields you want to delete:");
-						s_id = sc.nextInt();
-						String deleteQuery = String.format("Delete from student where s_id='%d'", s_id);
+						s_id = sc6.nextInt();
+						ps.setInt(1, s_id);
+						
 //the below code is not working because of ` symbol i think!!
 						// String.format("Insert into student values
 						// (`%d`,`%s`,`%d`,`%d`)",s_id,Name,c_id,Age);
-						int rowCount = statement.executeUpdate(deleteQuery);
+						int rowCount = ps.executeUpdate();
 
 						if (rowCount != 0) {
 							// Getting the output for insert operation
 							System.out.println("No of rows affected :: " + rowCount);
-							JdbcUtil1.closeConnections(resultSet, statement, connection);
+							JdbcUtilps.closeConnections(resultSet, ps, connection);
 						} else
 							System.out.println("No recrods affected ");
 

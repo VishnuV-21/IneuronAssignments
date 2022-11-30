@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
-public class JdbcUtil1 {
+public class JdbcUtilps {
 
 	// method to getting the connection setedUp
 	public static Connection getConnection() throws SQLException {
@@ -23,6 +23,7 @@ public class JdbcUtil1 {
 	}
 
 	public static int getUserInputForSelectQuery () {
+		System.out.println("In this application i have used Prepared Statement\n");
 		System.out.println("\t\t\tChoose the operation listed below on student table\r\n"
 				+ "\t1. Create \t\t2. Read \t\t3. Update \t\t4. Delete");
 		Scanner sc=new Scanner(System.in);
@@ -31,9 +32,7 @@ public class JdbcUtil1 {
 		return userChoice;
 	}
 	
-	public static void getUserInputForInsertQuery() {
-		int sid=3;
-	}
+	
 	public static void closeConnections(ResultSet resultSet, Statement statement,Connection connection) {
 		try {
 			if (resultSet != null) {
