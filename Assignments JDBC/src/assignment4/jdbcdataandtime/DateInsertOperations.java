@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 
-public class DateOperations {
+public class DateInsertOperations {
 public static void main(String[] args) {
 	String url="jdbc:mysql://localhost:3306/studentdob";
 	String user="root";
